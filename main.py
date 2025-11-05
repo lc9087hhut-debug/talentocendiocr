@@ -18,6 +18,10 @@ def detect_factura_type(file_path):
         from formats.factura_agro import FacturaExtractorAgro
         from formats.factura_cuotas import FacturaExtractorCuotas
         from formats.factura_yardins import FacturaExtractorYardins
+        from formats.factura_latam import FacturaExtractorLatam
+        from formats.factura_avianca import FacturaExtractorAvianca
+        from formats.factura_procafe import FacturaExtractorProcafe
+        from formats.factura_d1 import FacturaExtractorD1
 
         from text_extractor import TextExtractor
 
@@ -27,6 +31,11 @@ def detect_factura_type(file_path):
             ("agro", FacturaExtractorAgro),
             ("cuotas", FacturaExtractorCuotas),
             ("yardins", FacturaExtractorYardins),
+            ("latam", FacturaExtractorLatam),
+            ("avianca", FacturaExtractorAvianca),
+            ("procafe", FacturaExtractorProcafe),
+            ("d1", FacturaExtractorD1),
+
         ]
         temp = TextExtractor(file_path)
         text = temp.extract_text(quick=True)
@@ -61,6 +70,18 @@ def detect_factura_type(file_path):
         if "YARDINS" in clean_text:
             print("Detección heurística: factura tipo YARDINS")
             return "YARDINS"
+        if "LATAM" in clean_text:
+            print("Detección heurística: factura tipo LATAM")
+            return "LATAM"
+        if "AVIANCA" in clean_text:
+            print("Detección heurística: factura tipo AVIANCA")
+            return "AVIANCA"
+        if "PROCAFE" in clean_text:
+            print("Detección heurística: factura tipo PROCAFE")
+            return "PROCAFE"
+        if "D1" in clean_text:
+            print("Detección heurística: factura tipo D1")
+            return "D1"
 
         # Si falla la heurística, usar extractores formales
         for tipo, extractor_class in EXTRACTORS:
