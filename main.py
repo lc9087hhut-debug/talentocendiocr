@@ -64,6 +64,19 @@ def detect_factura_type(file_path):
         if "CUOTAS" in clean_text:
             print("Detección heurística: factura tipo CUOTAS")
             return "CUOTAS"
+        if "LATAM" in clean_text:
+            print("Detección heurística: factura tipo LATAM")
+            return "LATAM"
+        if "AVIANCA" in clean_text:
+            print("Detección heurística: factura tipo AVIANCA")
+            return "AVIANCA"
+        if "PROCAFE" in clean_text:
+            print("Detección heurística: factura tipo PROCAFE")
+            return "PROCAFE"
+        if "D1" in clean_text:
+            print("Detección heurística: factura tipo D1")
+            return "D1"
+          ### hola soy una prueba .....  
 
         # Si falla la heurística, usar extractores formales
         for tipo, extractor_class in EXTRACTORS:
