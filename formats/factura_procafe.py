@@ -1,7 +1,7 @@
 import re
 from text_extractor import TextExtractor
 
-class FacturaExtractorprocafe(TextExtractor):
+class FacturaExtractorProcafe(TextExtractor):
     """
     Clase para extraer datos específicos del formato de factura AGROCAMPO.
     """
