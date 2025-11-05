@@ -17,7 +17,6 @@ def detect_factura_type(file_path):
         from formats.factura_hellen import FacturaExtractorHellen
         from formats.factura_agro import FacturaExtractorAgro
         from formats.factura_cuotas import FacturaExtractorCuotas
-        from formats.factura_yardins import FacturaExtractorYardins
 
         from text_extractor import TextExtractor
 
@@ -26,7 +25,6 @@ def detect_factura_type(file_path):
             ("hellen", FacturaExtractorHellen),
             ("agro", FacturaExtractorAgro),
             ("cuotas", FacturaExtractorCuotas),
-            ("yardins", FacturaExtractorYardins),
         ]
         temp = TextExtractor(file_path)
         text = temp.extract_text(quick=True)
@@ -58,9 +56,6 @@ def detect_factura_type(file_path):
         if "CUOTAS" in clean_text:
             print("Detección heurística: factura tipo CUOTAS")
             return "CUOTAS"
-        if "YARDINS" in clean_text:
-            print("Detección heurística: factura tipo YARDINS")
-            return "YARDINS"
 
         # Si falla la heurística, usar extractores formales
         for tipo, extractor_class in EXTRACTORS:
