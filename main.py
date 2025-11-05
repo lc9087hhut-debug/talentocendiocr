@@ -17,6 +17,7 @@ def detect_factura_type(file_path):
         from formats.factura_hellen import FacturaExtractorHellen
         from formats.factura_agro import FacturaExtractorAgro
         from formats.factura_cuotas import FacturaExtractorCuotas
+        from formats.factura_yardins import FacturaExtractorYardins
 
         from text_extractor import TextExtractor
 
@@ -25,6 +26,7 @@ def detect_factura_type(file_path):
             ("hellen", FacturaExtractorHellen),
             ("agro", FacturaExtractorAgro),
             ("cuotas", FacturaExtractorCuotas),
+            ("yardins", FacturaExtractorYardins),
         ]
         temp = TextExtractor(file_path)
         text = temp.extract_text(quick=True)
@@ -56,6 +58,9 @@ def detect_factura_type(file_path):
         if "CUOTAS" in clean_text:
             print("Detección heurística: factura tipo CUOTAS")
             return "CUOTAS"
+        if "YARDINS" in clean_text:
+            print("Detección heurística: factura tipo YARDINS")
+            return "YARDINS"
 
         # Si falla la heurística, usar extractores formales
         for tipo, extractor_class in EXTRACTORS:
@@ -93,8 +98,8 @@ def main():
             factura_type = input("Ingrese manualmente el tipo de factura (BBI/HELLEN/CUOTAS): ").strip().upper()
 
             # Validar el tipo ingresado
-            if factura_type not in ['BBI', 'HELLEN', 'CUOTAS', 'AGRO']:
-                print("Tipo de factura no válido. Debe ser BBI, HELLEN o CUOTAS.")
+            if factura_type not in ['BBI', 'HELLEN', 'CUOTAS', 'AGRO', 'YARDINS']:
+                print("Tipo de factura no válido. Debe ser BBI, HELLEN, AGRO, CUOTAS o YARDINS.")
                 return
 
         # Procesar la factura
