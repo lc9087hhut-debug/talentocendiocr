@@ -118,6 +118,7 @@ class TextExtractor:
                 text = pytesseract.image_to_string(processed, lang="spa")
 
                 # Limpieza de texto
+                #clean = re.sub(r"[^\w\s\.\-\:/\$º°ºªÑñáéíóúÁÉÍÓÚ]", " ", text)
                 clean = re.sub(r"[^\w\s\.\-\:/]", " ", text)
                 clean = re.sub(r"\s+", " ", clean).strip()
                 if len(clean) < 30:
