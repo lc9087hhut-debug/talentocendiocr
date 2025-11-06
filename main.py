@@ -17,6 +17,11 @@ def detect_factura_type(file_path):
         from formats.factura_hellen import FacturaExtractorHellen
         from formats.factura_agro import FacturaExtractorAgro
         from formats.factura_cuotas import FacturaExtractorCuotas
+        from formats.factura_yardins import FacturaExtractorYardins
+        from formats.factura_latam import FacturaExtractorLatam
+        from formats.factura_avianca import FacturaExtractorAvianca
+        from formats.factura_procafe import FacturaExtractorProcafe
+        from formats.factura_d1 import FacturaExtractorD1
 
         from text_extractor import TextExtractor
 
@@ -25,6 +30,12 @@ def detect_factura_type(file_path):
             ("hellen", FacturaExtractorHellen),
             ("agro", FacturaExtractorAgro),
             ("cuotas", FacturaExtractorCuotas),
+            ("yardins", FacturaExtractorYardins),
+            ("latam", FacturaExtractorLatam),
+            ("avianca", FacturaExtractorAvianca),
+            ("procafe", FacturaExtractorProcafe),
+            ("d1", FacturaExtractorD1),
+
         ]
         temp = TextExtractor(file_path)
         text = temp.extract_text(quick=True)
