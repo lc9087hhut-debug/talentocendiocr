@@ -33,9 +33,8 @@ class FacturaExtractorLatam(TextExtractor):
 
         # --- 3. Total Pagado ---
         valor_total_patterns = [
-            r'Total\s+pagado\s+\$\s*([\d\.,]+)',
-            r'Total\s+pagado\s+([\d\.,]+)',
-            r'Total\s+Pago\s+\$?\s*([\d\.,]+)',
+            r'Forma\s+de\s+pago\s+([\d\.]+)',
+            r'pago\s+([\d\.]+)\s+Vuelo', 
         ]
         total_str = self._search_patterns(valor_total_patterns)
         extracted_data['valor_total'] = self._normalize_amount(total_str)
@@ -51,10 +50,8 @@ class FacturaExtractorLatam(TextExtractor):
 
         # --- 5. IVA/Tasas (Tasas y/o impuestos) ---
         iva_patterns = [
-            r'Tasas\s+y\s*o\s+impuestos[^\d]*\$?\s*([\d\.,]+)',
-            r'Tasas\s+y/o\s+impuestos[^\d]*\$?\s*([\d\.,]+)',
-            r'impuestos\s+\(1\)\s+\$\s*([\d\.,]+)',
-            r'Impuestos[^\d]*\$?\s*([\d\.,]+)',
+            r'Vuelo\s+[\d\.]+\s+([\d\.]+)', 
+            r'([\d\.]+)\s+LATAM\s+Wallet',
         ]
         iva_str = self._search_patterns(iva_patterns)
         extracted_data['iva'] = self._normalize_amount(iva_str)
