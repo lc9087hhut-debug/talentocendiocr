@@ -3,6 +3,7 @@ from formats.factura_hellen import FacturaExtractorHellen
 from formats.factura_agro import FacturaExtractorAgro
 from formats.factura_taberna import FacturaExtractorTaberna
 from formats.factura_cuotas import FacturaExtractorCuotas
+from formats.factura_latam import FacturaExtractorLatam
 
 # CLASE PRINCIPAL: FACTURA PROCESSOR
 class FacturaProcessor:
@@ -18,6 +19,7 @@ class FacturaProcessor:
         "agro": FacturaExtractorAgro,
         "taberna": FacturaExtractorTaberna,
         "cuotas": FacturaExtractorCuotas,
+        "latam": FacturaExtractorLatam,
     }
 
     @staticmethod

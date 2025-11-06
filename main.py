@@ -56,6 +56,9 @@ def detect_factura_type(file_path):
         if "CUOTAS" in clean_text:
             print("Detección heurística: factura tipo CUOTAS")
             return "CUOTAS"
+        if "LATAM" in clean_text:
+            print("Detección heurística: factura tipo LATAM")
+            return "LATAM"            
 
         # Si falla la heurística, usar extractores formales
         for tipo, extractor_class in EXTRACTORS:
@@ -93,8 +96,8 @@ def main():
             factura_type = input("Ingrese manualmente el tipo de factura (BBI/HELLEN/CUOTAS): ").strip().upper()
 
             # Validar el tipo ingresado
-            if factura_type not in ['BBI', 'HELLEN', 'CUOTAS', 'AGRO', 'YARDINS']:
-                print("Tipo de factura no válido. Debe ser BBI, HELLEN, AGRO, CUOTAS o YARDINS.")
+            if factura_type not in ['BBI', 'HELLEN', 'CUOTAS', 'AGRO', 'YARDINS', 'LATAM']:
+                print("Tipo de factura no válido. Debe ser BBI, HELLEN, AGRO, CUOTAS, LATAM o YARDINS.")
                 return
 
         # Procesar la factura
