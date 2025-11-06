@@ -1,6 +1,10 @@
 import os
+import json
 from factura_processor import FacturaProcessor
 from structure_analyzer import StructureAnalyzer
+import time
+from datetime import datetime
+
 
 # FUNCIÓN: Detección automática del tipo de factura
 def detect_factura_type(file_path):
@@ -98,6 +102,17 @@ def detect_factura_type(file_path):
         print(f"Error durante la detección: {e}")
         return "desconocido"
 
+
+
+def guardar_datos_json(output_path, data):
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+# Usando time
+timestamp_int_time = int(time.time())
+
+
+
 # FUNCIÓN PRINCIPAL
 def main():
     print("\n=== EXTRACTOR DE DATOS DE FACTURAS ===")
@@ -128,13 +143,18 @@ def main():
         success, data = FacturaProcessor.process_factura(file_path, factura_type)
 
         if success:
-            print("\nDATOS EXTRAÍDOS:")
-            for k, v in data.items():
-                print(f"{k}: {v}")
 
-            # Guardar CSV
-            output_dir = os.path.join(os.path.dirname(file_path), "data")
+            
+            timestamp = int(datetime.now().timestamp())
+# Guardar TXT y CSV
+            output_dir = os.path.join(os.path.dirname(file_path), "extracted")
+            
+
             os.makedirs(output_dir, exist_ok=True)
+            txt_file = os.path.join(output_dir, os.path.splitext(os.path.basename(file_path))[0] + "_extracted.txt")
+            json_file = os.path.join(output_dir, os.path.splitext(os.path.basename(file_path))[0]+"_"+ str(timestamp) + ".json")
+            guardar_datos_json(json_file, data)
+            print(f"Datos guardados en: {json_file}")
             csv_file = os.path.join(output_dir, os.path.splitext(os.path.basename(file_path))[0] + "_extracted.csv")
 
             with open(csv_file, "w", encoding="utf-8") as f:
@@ -187,8 +207,14 @@ def main():
                 success, data = FacturaProcessor.process_factura(file_path, factura_type)
                 if success:
                     # Crear directorio de salida si no existe
-                    output_dir = os.path.join(folder_path, "data")
+                    output_dir = os.path.join(folder_path, "extracted")
                     os.makedirs(output_dir, exist_ok=True)
+                    txt_file = os.path.join(output_dir, os.path.splitext(pdf_file)[0] + "_extracted.txt")
+                    guardar_datos_txt(txt_file, data)
+                    print(f"Datos guardados en: {txt_file}")
+                    json_file = os.path.join(output_dir, os.path.splitext(pdf_file)[0] + "_extracted.json")
+                    guardar_datos_json(json_file, data)
+                    print(f"Datos guardados en: {json_file}")
                     csv_file = os.path.join(output_dir, os.path.splitext(pdf_file)[0] + "_extracted.csv")
                     with open(csv_file, "w", encoding="utf-8") as f:
                         f.write("Campo,Valor\n")
