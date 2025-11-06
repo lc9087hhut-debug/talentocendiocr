@@ -22,8 +22,8 @@ class TextExtractor:
         user = getpass.getuser()
 
         # Configuración de rutas (modificar las rutas el usuario)
-        default_tesseract = fr"C:\Users\{user}\Desktop\OcrXclass\utils\Tesseract-OCR\tesseract.exe"
-        default_poppler = fr"C:\Users\{user}\Desktop\OcrXclass\utils\poppler-24.08.0\Library\bin"
+        default_tesseract = fr"utils\Tesseract-OCR\tesseract.exe"
+        default_poppler = fr"utils\poppler-24.08.0\Library\bin"
 
         # Validar y configurar Tesseract
         if os.path.exists(default_tesseract):
