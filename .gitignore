@@ -214,3 +214,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data carpeta donde se guarda los datos extraid
+data/extracted/
+data/extracted/*.json
+data/extracted/*.txt
+data/extracted/*.csv
