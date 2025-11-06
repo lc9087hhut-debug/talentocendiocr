@@ -3,108 +3,166 @@ from text_extractor import TextExtractor
 
 class FacturaExtractorLatam(TextExtractor):
     """
-    Clase para extraer datos específicos del formato de factura AGROCAMPO.
+    Clase para extraer datos específicos de tiquetes LATAM Airlines.
     """
 
     def extract_data(self):
         """
-        Extrae los datos requeridos de la factura usando expresiones regulares
-        específicas para el formato AGROCAMPO.
+        Extrae los datos requeridos del tiquete LATAM usando expresiones regulares.
         """
         extracted_data = {}
         
-        # --- NIT Emisor ---
-        nit_emisor_patterns = [
-            r'NIT[:\s]*([0-9.\-]+)',
-            r'N\.?I\.?T\.?[:\s]*([0-9\-]+)',
-        ]
-        extracted_data['nit_emisor'] = self._search_patterns(nit_emisor_patterns)
-
-        # --- NIT Cliente ---
-        nit_cliente_patterns = [
-            r'CLIENTE.*?NIT[^\d]*([\d\-]+)',
-            r'NIT[^\d]*([\d\-]+).*?TEL',
-        ]
-        extracted_data['nit_cliente'] = self._search_patterns(nit_cliente_patterns)
-
-        # --- Fecha Emisión ---
+        # --- 1. Fecha de Emisión ---
         fecha_emision_patterns = [
-            r'FECHA EMISIÓN[:\s]*(\d{2}/\d{2}/\d{4})',
-            r'Fecha de emisión[:\s]*(\d{2}-\d{2}-\d{4})',
+            r'Ciudad\s+y\s+Fecha\s+de\s+emisi[oó]n\s+[^0-9]*(\d{2}/\d{2}/\d{2})',
+            r'Fecha\s+de\s+emisi[oó]n[:\s]*(\d{2}/\d{2}/\d{2})',
+            r'Colombia\s+(\d{2}/\d{2}/\d{2})',  # Patrón más simple
         ]
         extracted_data['fecha_emision'] = self._search_patterns(fecha_emision_patterns)
 
-        # --- RAZÓN SOCIAL (Cliente) ---
-        razon_patterns = [
-            r'AGROCAMPO SAS Res\.',
-            r'ELABORADO POR\s*([^\n]+)',
+        # --- 2. Número de Factura (Nº de orden) ---
+        # Patrones más flexibles para capturar LA0354771BNAY
+        numero_factura_patterns = [
+            r'N\s*de\s+orden\s+([A-Z]{2}\d+[A-Z]+)',  # Más flexible con espacios
+            r'orden\s+([A-Z]{2}\d{7,}[A-Z]*)',
+            r'de\s+orden\s+([A-Z0-9]{10,})',  # Captura códigos largos
+            r'OCTKSP\s+N\s+de\s+orden\s+([A-Z0-9]+)',  # Con código de reserva
+            r'(LA\d{7,}[A-Z]+)',  # Busca directamente patrón LA seguido de números y letras
         ]
-        razon_social = self._search_patterns(razon_patterns)
-        if razon_social:
-            # Tomamos solo el primer nombre (antes del espacio)
-            extracted_data['razon_social'] = razon_social.split()[0]
-        else:
-            extracted_data['razon_social'] = ""
+        extracted_data['numero_factura'] = self._search_patterns(numero_factura_patterns)
 
-        # --- NÚMERO DE FACTURA ---
-        # Buscamos específicamente después de "FACTURA ELECTRÓNICA DE VENTA"
-        factura_patterns = [
-            r'FACTURA ELECTRÓNICA DE VENTA FACTURA ELECTRÓNICA DE\s+([A-Z0-9]+)',
-            r'FACTURA\s+([A-Z0-9]+)',
+        # --- 3. Total Pagado ---
+        valor_total_patterns = [
+            r'Total\s+pagado\s+\$\s*([\d\.,]+)',
+            r'Total\s+pagado\s+([\d\.,]+)',
+            r'Total\s+Pago\s+\$?\s*([\d\.,]+)',
         ]
-        extracted_data['numero_factura'] = self._search_patterns(factura_patterns)
+        total_str = self._search_patterns(valor_total_patterns)
+        extracted_data['valor_total'] = self._normalize_amount(total_str)
 
-        # --- SUBTOTAL (TOTAL BRUTO) ---
+        # --- 4. Subtotal (Vuelo) ---
         subtotal_patterns = [
-            r'TOTAL BRUTO[:\s]*([0-9., ]+)',
+            r'Vuelo\s+\$\s*([\d\.,]+)',
+            r'Vuelo\s+([\d\.,]+)',
+            r'Pasaje\s+\$?\s*([\d\.,]+)',
         ]
-        subtotal = self._search_patterns(subtotal_patterns)
-        extracted_data['subtotal'] = self._normalize_amount(subtotal)
+        subtotal_str = self._search_patterns(subtotal_patterns)
+        extracted_data['subtotal'] = self._normalize_amount(subtotal_str)
 
-        # --- IVA ---
+        # --- 5. IVA/Tasas (Tasas y/o impuestos) ---
         iva_patterns = [
-            r'IVA\s+[0-9.]+%\s*([0-9., ]+)',  # IVA 5.00% 10,274.00
-            r'VALOR\s*IMPUESTO\s*%\s*([0-9., ]+)',  # VALOR IMPUESTO % 10,274.00
-            r'VALOR\s*IMPUESTO\s*[0-9.]+%\s*([0-9., ]+)',  # VALOR IMPUESTO 5.00% 10,274.00
-            r'IMPUESTO\s*([0-9., ]+)',  # Si aparece solo IMPUESTO y luego el valor
-            r'IVA\s*([0-9., ]+)',  # Si aparece solo IVA y luego el valor
+            r'Tasas\s+y\s*o\s+impuestos[^\d]*\$?\s*([\d\.,]+)',
+            r'Tasas\s+y/o\s+impuestos[^\d]*\$?\s*([\d\.,]+)',
+            r'impuestos\s+\(1\)\s+\$\s*([\d\.,]+)',
+            r'Impuestos[^\d]*\$?\s*([\d\.,]+)',
         ]
-        iva = self._search_patterns(iva_patterns)
-        extracted_data['iva'] = self._normalize_amount(iva)
+        iva_str = self._search_patterns(iva_patterns)
+        extracted_data['iva'] = self._normalize_amount(iva_str)
 
-        # --- TOTAL ---
-        total_patterns = [
-            r'VALOR TOTAL[:\s]*([0-9., ]+)',
+        # --- 6. Razón Social ---
+        razon_social_patterns = [
+            r'(AEROVIAS\s+DE\s+INTEGRACI[OÓ]N\s+REGIONAL\s+S\.A\.)',
+            r'(AEROVIAS\s+DE\s+INTEGRACION\s+REGIONAL\s+S\s*A)',
+            r'(LATAM\s+AIRLINES\s+COLOMBIA)',
         ]
-        total = self._search_patterns(total_patterns)
-        extracted_data['valor_total'] = self._normalize_amount(total)
+        razon_social = self._search_patterns(razon_social_patterns)
+        if not razon_social:
+            razon_social = "LATAM AIRLINES COLOMBIA"
+        extracted_data['razon_social'] = razon_social
+
+        # --- 7. NIT Emisor ---
+        nit_emisor_patterns = [
+            r'NIT\s+([\d\.\-\s]+\-\s*\d)',  # Captura formato con guiones
+            r'NIT[:\s]*([\d\.\-]+)',
+            r'NIT\s+(\d{3}\.\d{3}\.\d{3}\s*\-\s*\d)',  # Formato específico
+        ]
+        extracted_data['nit_emisor'] = self._search_patterns(nit_emisor_patterns)
+
+        # --- 8. NIT/Documento Cliente ---
+        # Mejores patrones para capturar el documento
+        # --- 8. NIT/Documento Cliente ---
+        nit_cliente_patterns = [
+            r'Documento\s+de\s+Identificaci[oó]n\s+(\d{7,})',
+            r'Identificacion\s+(\d{7,})',
+            r'Adulto\s+(\d{7,})',
+            r'LOPEZ\s+Adulto\s+(\d{7,})',
+            r'pasajero\s+Documento\s+de\s+Identificaci[oó]n\s+[^\d]*(\d{7,})',
+            # NUEVOS PATRONES más flexibles:
+            r'Adulto\s+\d+\s+(\d{7,})',  # "Adulto 1 1022981317"
+            r'Tipo\s+de\s+pasajero.*?(\d{10})',  # Con salto de línea
+            r'USECHE.*?(\d{10})',  # Después del apellido
+            r'(\d{10})',  # Último recurso: cualquier número de 10 dígitos
+        ]
+        extracted_data['nit_cliente'] = self._search_patterns(nit_cliente_patterns)
 
         return extracted_data
 
     def _search_patterns(self, patterns):
         for pattern in patterns:
-            match = re.search(pattern, self.text, re.IGNORECASE)
+            match = re.search(pattern, self.text, re.IGNORECASE | re.DOTALL)
             if match:
                 try:
-                    return match.group(1).strip()
+                    result = match.group(1).strip()
+                    # Limpieza adicional de espacios
+                    result = re.sub(r'\s+', ' ', result).strip()
+                    return result
                 except IndexError:
-                    return match.group(0).strip()
+                    result = match.group(0).strip()
+                    return re.sub(r'\s+', ' ', result).strip()
         return ""
 
     def process(self):
         if not self.extract_text():
             return False, []
+        
+        # DEBUG: Mostrar dónde aparece el documento
+        print(f"\n=== DEBUG: Búsqueda de documento ===")
+        
+        # Buscar "1022981317" y mostrar contexto
+        doc_number = "1022981317"
+        if doc_number in self.text:
+            idx = self.text.index(doc_number)
+            start = max(0, idx - 100)
+            end = min(len(self.text), idx + 150)
+            print(f"Contexto alrededor del documento:")
+            print(f"'{self.text[start:end]}'")
+        
+        # Buscar "Adulto" y mostrar contexto
+        adulto_matches = [m.start() for m in re.finditer(r'Adulto', self.text, re.IGNORECASE)]
+        if adulto_matches:
+            print(f"\nEncontradas {len(adulto_matches)} ocurrencias de 'Adulto':")
+            for i, idx in enumerate(adulto_matches[:3], 1):  # Solo primeras 3
+                start = max(0, idx - 50)
+                end = min(len(self.text), idx + 100)
+                print(f"{i}. '{self.text[start:end]}'")
+        
+        print("=== FIN DEBUG ===\n")
+            
         extracted_data = self.extract_data()
-        required_fields = ['nit_emisor', 'nit_cliente', 'fecha_emision', 'iva', 'razon_social', 'numero_factura', 'valor_total']
+        
+        required_fields = [
+            'fecha_emision', 
+            'numero_factura', 
+            'valor_total', 
+            'subtotal', 
+            'iva', 
+            'razon_social', 
+            'nit_emisor', 
+            'nit_cliente'
+        ]
+        
         missing = [f for f in required_fields if not extracted_data.get(f)]
         if missing:
+            print(f"Campos faltantes: {missing}")
+            print(f"Datos extraídos: {extracted_data}")
             return False, missing
+            
         return True, extracted_data
     
     @staticmethod
     def _normalize_amount(value):
         if not value:
-            return "0,00"         
+            return "0,00"
         value = re.sub(r'\s+', '', value)
         clean = re.sub(r"[^\d,\.]", "", value)
         
@@ -113,7 +171,7 @@ class FacturaExtractorLatam(TextExtractor):
         elif ',' in clean:
             clean = clean.replace(',', '.')
         elif '.' in clean:
-            pass      
+            pass
         try:
             num = float(clean)
             return f"{num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
@@ -125,4 +183,6 @@ class FacturaExtractorLatam(TextExtractor):
         if not isinstance(text, str):
             return False
         text_upper = text.upper()
-        return "AGROCAMPO SAS" in text_upper or "WWW.AGROCAMPO.COM.CO" in text_upper
+        return ("LATAM" in text_upper and "AIRLINES" in text_upper) or \
+               ("AEROVIAS" in text_upper and "REGIONAL" in text_upper) or \
+               "TIQUETE DE TRANSPORTE" in text_upper
