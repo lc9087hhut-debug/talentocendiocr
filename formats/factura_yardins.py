@@ -102,11 +102,11 @@ class FacturaExtractorYardins(TextExtractor):
         extracted_data['nit_emisor'] = self._search_patterns(nit_emisor_patterns)
 
         # --- 2. CC/NIT Cliente ---
-        cc_cliente_patterns = [
+        nit_cliente_patterns = [
             r'CC[:\s]*(\d+)',           # Busca 'CC:' seguido del número
             r'Cliente.*?NIT[^\d]*([\d\-]+)', # Patrón alternativo si la etiqueta fuera 'NIT'
         ]
-        extracted_data['cc_cliente'] = self._search_patterns(cc_cliente_patterns)
+        extracted_data['nit_cliente'] = self._search_patterns(nit_cliente_patterns)
 
         # --- 3. Email Cliente ---
         email_cliente_patterns = [
@@ -138,7 +138,7 @@ class FacturaExtractorYardins(TextExtractor):
         ]
         # Almacenamos el valor sin normalizar por ahora
         total_str = self._search_patterns(total_patterns)
-        extracted_data['total_operacion'] = self._normalize_amount(total_str)
+        extracted_data['valor_total'] = self._normalize_amount(total_str)
 
 
         return extracted_data
@@ -164,8 +164,8 @@ class FacturaExtractorYardins(TextExtractor):
             
         extracted_data = self.extract_data()
         
-        # Ajuste en los campos requeridos: cambiamos 'nit_cliente' por 'cc_cliente'
-        required_fields = ['nit_emisor','cc_cliente','numero_factura','fecha_emision', 'total_operacion']
+        # Ajuste en los campos requeridos: cambiamos 'nit_cliente' por 'nit_cliente'
+        required_fields = ['nit_emisor','nit_cliente','numero_factura','fecha_emision', 'valor_total']
         
         missing = [f for f in required_fields if not extracted_data.get(f)]
         if missing:
