@@ -94,7 +94,7 @@ def main():
             return
         factura_type = detect_factura_type(file_path)
         if factura_type == "desconocido":
-            print("No se pudo detectar el tipo de factura.")
+            print("1No se pudo detectar el tipo de factura.")
             factura_type = input("Ingrese manualmente el tipo de factura (BBI/HELLEN/CUOTAS): ").strip().upper()
 
             # Validar el tipo ingresado

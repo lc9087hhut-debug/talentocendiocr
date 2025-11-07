@@ -20,6 +20,7 @@ class FacturaExtractoradidas(TextExtractor):
             r'N\.?I\.?T\.?[:\s]*([0-9\-]+)',
         ]
         extracted_data['nit_emisor'] = self._search_patterns(nit_emisor_patterns)
+        
 
         # --- NIT Cliente ---
         nit_cliente_patterns = [
@@ -29,14 +30,14 @@ class FacturaExtractoradidas(TextExtractor):
             r'([0-9]{7,}-\d)',   
         ]
         extracted_data['nit_cliente'] = self._search_patterns(nit_cliente_patterns)
-
+        
         # --- Fecha y Hora (Fecha de Emisión) ---
         fecha_emision_patterns = [
             r'Fecha y Hora[:\s]*(\d{2}/\d{2}/\d{4}\s*-\s*\d{2}:\d{2}:\d{2})',
             r'Fecha\s*[:\s]*(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})',
         ]
         extracted_data['fecha_emision'] = self._search_patterns(fecha_emision_patterns)
-
+        
         # --- Razón Social (Cliente) ---
         razon_patterns = [
             r'Adidas Colombia Ltda\.?',
@@ -52,14 +53,14 @@ class FacturaExtractoradidas(TextExtractor):
             r'Num\.?\s*Interno[:\s]*([0-9]{17})',
         ]
         extracted_data['numero_interno'] = self._search_patterns(numero_interno_patterns)
-
+        
         # --- Subtotal ---
         subtotal_patterns = [
             r'SUBTOTAL[:\s]*([0-9., ]+)',
         ]
         subtotal = self._search_patterns(subtotal_patterns)
         extracted_data['subtotal'] = self._normalize_amount(subtotal)
-
+        
         # --- IVA ---
         iva_patterns = [
             r'IVA[:\s]+[0-9.,]+%?\s*([0-9., ]+)',
@@ -67,16 +68,6 @@ class FacturaExtractoradidas(TextExtractor):
         ]
         iva = self._search_patterns(iva_patterns)
         extracted_data['iva'] = self._normalize_amount(iva)
-
-        # --- Total ---
-        total_patterns = [
-            r'TOTAL\s*\(COP\)[:\s]*([0-9., ]+)',
-            r'TOTAL\s*COP[:\s]*([0-9., ]+)',
-            r'VALOR\s*TOTAL[:\s]*([0-9., ]+)',
-            r'TOTAL\s*[:\-]?\s*([0-9.,]+)',
-        ]
-        total = self._search_patterns(total_patterns)
-        extracted_data['valor_total'] = self._normalize_amount(total)
 
         return extracted_data
 
@@ -105,10 +96,10 @@ class FacturaExtractoradidas(TextExtractor):
         required_fields = [
             'nit_emisor',
             'nit_cliente',
-            'fecha_emision',
-            'razon_social',
-            'numero_factura',
-            'valor_total'
+            #'fecha_emision',
+            #'razon_social',
+            #'numero_factura',
+            #'valor_total'
         ]
 
         missing = [f for f in required_fields if not extracted_data.get(f)]
