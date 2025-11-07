@@ -22,6 +22,7 @@ def detect_factura_type(file_path):
         from formats.factura_avianca import FacturaExtractorAvianca
         from formats.factura_procafe import FacturaExtractorProcafe
         from formats.factura_d1 import FacturaExtractorD1
+        from formats.factura_adidas import FacturaExtractoradidas
 
         from text_extractor import TextExtractor
 
@@ -34,7 +35,8 @@ def detect_factura_type(file_path):
             ("latam", FacturaExtractorLatam),
             ("avianca", FacturaExtractorAvianca),
             ("procafe", FacturaExtractorProcafe),
-            ("d1", FacturaExtractorD1),
+            #("d1", FacturaExtractorD1),
+            ("adidas", FacturaExtractoradidas)
 
         ]
         temp = TextExtractor(file_path)
@@ -79,9 +81,13 @@ def detect_factura_type(file_path):
         if "PROCAFE" in clean_text:
             print("Detección heurística: factura tipo PROCAFE")
             return "PROCAFE"
+        if "ADIDAS" in clean_text:
+            print("Detección heurística: factura tipo ADIDAS")
+            return "ADIDAS"
         if "D1" in clean_text:
-            print("Detección heurística: factura tipo D1")
-            return "D1"
+           print("Detección heurística: factura tipo D1")
+           return "D1"
+        
 
         # Si falla la heurística, usar extractores formales
         for tipo, extractor_class in EXTRACTORS:
@@ -115,7 +121,7 @@ def main():
             return
         factura_type = detect_factura_type(file_path)
         if factura_type == "desconocido":
-            print("No se pudo detectar el tipo de factura.")
+            print("1No se pudo detectar el tipo de factura.")
             factura_type = input("Ingrese manualmente el tipo de factura (BBI/HELLEN/CUOTAS): ").strip().upper()
 
             # Validar el tipo ingresado

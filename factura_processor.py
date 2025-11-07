@@ -8,6 +8,7 @@ from formats.factura_latam import FacturaExtractorLatam
 from formats.factura_avianca import FacturaExtractorAvianca
 from formats.factura_procafe import FacturaExtractorProcafe
 from formats.factura_d1 import FacturaExtractorD1
+from formats.factura_adidas import FacturaExtractoradidas
 
 # CLASE PRINCIPAL: FACTURA PROCESSOR
 class FacturaProcessor:
@@ -27,7 +28,8 @@ class FacturaProcessor:
         "yardins": FacturaExtractorYardins,
         "avianca": FacturaExtractorAvianca,
         "procafe": FacturaExtractorProcafe,
-        "d1": FacturaExtractorD1,
+        ##"d1": FacturaExtractorD1,
+        "adidas": FacturaExtractoradidas,
     }
 
     @staticmethod
