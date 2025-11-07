@@ -3,7 +3,11 @@ from formats.factura_hellen import FacturaExtractorHellen
 from formats.factura_agro import FacturaExtractorAgro
 from formats.factura_taberna import FacturaExtractorTaberna
 from formats.factura_cuotas import FacturaExtractorCuotas
+from formats.factura_yardins import FacturaExtractorYardins
 from formats.factura_latam import FacturaExtractorLatam
+from formats.factura_avianca import FacturaExtractorAvianca
+from formats.factura_procafe import FacturaExtractorProcafe
+from formats.factura_d1 import FacturaExtractorD1
 
 # CLASE PRINCIPAL: FACTURA PROCESSOR
 class FacturaProcessor:
@@ -20,6 +24,10 @@ class FacturaProcessor:
         "taberna": FacturaExtractorTaberna,
         "cuotas": FacturaExtractorCuotas,
         "latam": FacturaExtractorLatam,
+        "yardins": FacturaExtractorYardins,
+        "avianca": FacturaExtractorAvianca,
+        "procafe": FacturaExtractorProcafe,
+        "d1": FacturaExtractorD1,
     }
 
     @staticmethod
@@ -78,3 +86,4 @@ class FacturaProcessor:
             import traceback
             traceback.print_exc()
             return False, {}
+        
