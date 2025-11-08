@@ -8,11 +8,10 @@ from factura_processor import FacturaProcessor
 from main import detect_factura_type
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024 
 app.config['UPLOAD_FOLDER'] = tempfile.mkdtemp(prefix='factura_uploads_')
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 
-# Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -37,7 +36,6 @@ def upload_file():
         if not allowed_file(file.filename):
             return jsonify({'success': False, 'error': 'Only PDF files are allowed'}), 400
         
-        # Save uploaded file
         filename = secure_filename(file.filename)
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
@@ -52,7 +50,6 @@ def upload_file():
                 'file_path': file_path
             }), 400
         
-        # Process invoice
         success, data = FacturaProcessor.process_factura(file_path, factura_type)
         
         if not success:
@@ -62,10 +59,8 @@ def upload_file():
                 'file_path': file_path
             }), 400
         
-        # Create CSV content
         csv_content = "Campo,Valor\n"
         for k, v in data.items():
-            # Escape commas and quotes in CSV
             v_str = str(v).replace('"', '""')
             csv_content += f'"{k}","{v_str}"\n'
         
@@ -110,7 +105,6 @@ def process_batch():
                 file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(file_path)
                 
-                # Detect invoice type
                 factura_type = detect_factura_type(file_path)
                 
                 if factura_type == "desconocido":
@@ -119,8 +113,7 @@ def process_batch():
                         'error': 'Could not detect invoice type'
                     })
                     continue
-                
-                # Process invoice
+            
                 success, data = FacturaProcessor.process_factura(file_path, factura_type)
                 
                 if success:
@@ -162,7 +155,6 @@ def download_csv():
         csv_content = data.get('csv_content', '')
         filename = data.get('filename', 'invoice_data')
         
-        # Create temporary file
         temp_file = tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, encoding='utf-8')
         temp_file.write(csv_content)
         temp_file.close()
@@ -182,7 +174,6 @@ def health():
     return jsonify({'status': 'ok'})
 
 if __name__ == '__main__':
-    # Clean up temp files on startup
     if os.path.exists(app.config['UPLOAD_FOLDER']):
         shutil.rmtree(app.config['UPLOAD_FOLDER'], ignore_errors=True)
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
