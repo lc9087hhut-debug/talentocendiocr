@@ -9,35 +9,35 @@ class FacturaExtractorAvianca(TextExtractor):
     def extract_data(self):
         """
         Extrae los datos requeridos de la factura usando expresiones regulares
-        específicas para el formato AGROCAMPO.
+        específicas para el formato AVIANCA.
         """
         extracted_data = {}
         
         # --- NIT Emisor ---
         nit_emisor_patterns = [
-            r'NIT[:\s]*([0-9.\-]+)',
-            r'N\.?I\.?T\.?[:\s]*([0-9\-]+)',
+            r'No\.? Ident, Fiscal[:\-\.\s]*([0-9.\-\s]+)',
+            r'N\.?I\.?T\.?[:\s]*([0-9\-\s]+)',
         ]
         extracted_data['nit_emisor'] = self._search_patterns(nit_emisor_patterns)
 
         # --- NIT Cliente ---
         nit_cliente_patterns = [
-            r'CLIENTE.*?NIT[^\d]*([\d\-]+)',
-            r'NIT[^\d]*([\d\-]+).*?TEL',
+            r'Correo Electrónico.*? [^\d]*([\d\-]+)',
+            r'Cliente[^\d]*([\d\-]+).*?Dirección',
         ]
         extracted_data['nit_cliente'] = self._search_patterns(nit_cliente_patterns)
 
         # --- Fecha Emisión ---
         fecha_emision_patterns = [
-            r'FECHA EMISIÓN[:\s]*(\d{2}/\d{2}/\d{4})',
+            r'Fecha Expedición[:\s]*(\d{2}/\d{2}/\d{4})',
             r'Fecha de emisión[:\s]*(\d{2}-\d{2}-\d{4})',
         ]
         extracted_data['fecha_emision'] = self._search_patterns(fecha_emision_patterns)
 
         # --- RAZÓN SOCIAL (Cliente) ---
         razon_patterns = [
-            r'AGROCAMPO SAS Res\.',
-            r'ELABORADO POR\s*([^\n]+)',
+            r'AVIANCA Res\.',
+            r'EDIFICIO \s*([^\n]+)',
         ]
         razon_social = self._search_patterns(razon_patterns)
         if razon_social:
@@ -49,23 +49,25 @@ class FacturaExtractorAvianca(TextExtractor):
         # --- NÚMERO DE FACTURA ---
         # Buscamos específicamente después de "FACTURA ELECTRÓNICA DE VENTA"
         factura_patterns = [
-            r'FACTURA ELECTRÓNICA DE VENTA FACTURA ELECTRÓNICA DE\s+([A-Z0-9]+)',
-            r'FACTURA\s+([A-Z0-9]+)',
+            r'Factura Electrónica de Venta  No \s+([A-Z0-9]+)',
+            r'Venta No\s+([A-Z0-9]+)',
         ]
         extracted_data['numero_factura'] = self._search_patterns(factura_patterns)
 
         # --- SUBTOTAL (TOTAL BRUTO) ---
         subtotal_patterns = [
-            r'TOTAL BRUTO[:\s]*([0-9., ]+)',
+            r'BASE[:\s]*([0-9., \t]+)',
         ]
         subtotal = self._search_patterns(subtotal_patterns)
         extracted_data['subtotal'] = self._normalize_amount(subtotal)
 
         # --- IVA ---
         iva_patterns = [
-            r'IVA\s+[0-9.]+%\s*([0-9., ]+)',  # IVA 5.00% 10,274.00
-            r'VALOR\s*IMPUESTO\s*%\s*([0-9., ]+)',  # VALOR IMPUESTO % 10,274.00
-            r'VALOR\s*IMPUESTO\s*[0-9.]+%\s*([0-9., ]+)',  # VALOR IMPUESTO 5.00% 10,274.00
+            r'IVA.*?[:\s]*([0-9., ]+)',  # IVA 5.00% 10,274.00
+            #r'IVA\s+[0-9.]+%\s*([0-9., ]+)',  # IVA 5.00% 10,274.00
+            r'MONTO\s*BASE\s*%\s*([0-9., ]+)',  # VALOR IMPUESTO % 10,274.00
+            r'VALOR\s*IMPUESTO\s*([0-9., ]+)',  # VALOR IMPUESTO 5.00% 10,274.00
+            #r'VALOR\s*IMPUESTO\s*[0-9.]+%\s*([0-9., ]+)',  # VALOR IMPUESTO 5.00% 10,274.00
             r'IMPUESTO\s*([0-9., ]+)',  # Si aparece solo IMPUESTO y luego el valor
             r'IVA\s*([0-9., ]+)',  # Si aparece solo IVA y luego el valor
         ]
@@ -74,7 +76,7 @@ class FacturaExtractorAvianca(TextExtractor):
 
         # --- TOTAL ---
         total_patterns = [
-            r'VALOR TOTAL[:\s]*([0-9., ]+)',
+            r'TOTAL A PAGAR[:\s]*([A-Za-z0-9.,\ \' ]+)',
         ]
         total = self._search_patterns(total_patterns)
         extracted_data['valor_total'] = self._normalize_amount(total)
@@ -97,6 +99,7 @@ class FacturaExtractorAvianca(TextExtractor):
         extracted_data = self.extract_data()
         required_fields = ['nit_emisor', 'nit_cliente', 'fecha_emision', 'iva', 'razon_social', 'numero_factura', 'valor_total']
         missing = [f for f in required_fields if not extracted_data.get(f)]
+        print(extracted_data)
         if missing:
             return False, missing
         return True, extracted_data
@@ -125,4 +128,4 @@ class FacturaExtractorAvianca(TextExtractor):
         if not isinstance(text, str):
             return False
         text_upper = text.upper()
-        return "AGROCAMPO SAS" in text_upper or "WWW.AGROCAMPO.COM.CO" in text_upper
+        return "AVIANCA" in text_upper or "AEROVIAS DEL CONTINENTE AMERICANO S.A" in text_upper
