@@ -16,18 +16,18 @@ class FacturaExtractorLatam(TextExtractor):
         fecha_emision_patterns = [
             r'Ciudad\s+y\s+Fecha\s+de\s+emisi[oó]n\s+[^0-9]*(\d{2}/\d{2}/\d{2})',
             r'Fecha\s+de\s+emisi[oó]n[:\s]*(\d{2}/\d{2}/\d{2})',
-            r'Colombia\s+(\d{2}/\d{2}/\d{2})',  # Patrón más simple
+            r'Colombia\s+(\d{2}/\d{2}/\d{2})',
         ]
         extracted_data['fecha_emision'] = self._search_patterns(fecha_emision_patterns)
 
         # --- 2. Número de Factura (Nº de orden) ---
         # Patrones más flexibles para capturar LA0354771BNAY
         numero_factura_patterns = [
-            r'N\s*de\s+orden\s+([A-Z]{2}\d+[A-Z]+)',  # Más flexible con espacios
+            r'N\s*de\s+orden\s+([A-Z]{2}\d+[A-Z]+)',
             r'orden\s+([A-Z]{2}\d{7,}[A-Z]*)',
-            r'de\s+orden\s+([A-Z0-9]{10,})',  # Captura códigos largos
-            r'OCTKSP\s+N\s+de\s+orden\s+([A-Z0-9]+)',  # Con código de reserva
-            r'(LA\d{7,}[A-Z]+)',  # Busca directamente patrón LA seguido de números y letras
+            r'de\s+orden\s+([A-Z0-9]{10,})',
+            r'OCTKSP\s+N\s+de\s+orden\s+([A-Z0-9]+)',
+            r'(LA\d{7,}[A-Z]+)',
         ]
         extracted_data['numero_factura'] = self._search_patterns(numero_factura_patterns)
 
@@ -69,14 +69,12 @@ class FacturaExtractorLatam(TextExtractor):
 
         # --- 7. NIT Emisor ---
         nit_emisor_patterns = [
-            r'NIT\s+([\d\.\-\s]+\-\s*\d)',  # Captura formato con guiones
+            r'NIT\s+([\d\.\-\s]+\-\s*\d)',
             r'NIT[:\s]*([\d\.\-]+)',
-            r'NIT\s+(\d{3}\.\d{3}\.\d{3}\s*\-\s*\d)',  # Formato específico
+            r'NIT\s+(\d{3}\.\d{3}\.\d{3}\s*\-\s*\d)',
         ]
         extracted_data['nit_emisor'] = self._search_patterns(nit_emisor_patterns)
 
-        # --- 8. NIT/Documento Cliente ---
-        # Mejores patrones para capturar el documento
         # --- 8. NIT/Documento Cliente ---
         nit_cliente_patterns = [
             r'Documento\s+de\s+Identificaci[oó]n\s+(\d{7,})',
@@ -84,11 +82,10 @@ class FacturaExtractorLatam(TextExtractor):
             r'Adulto\s+(\d{7,})',
             r'LOPEZ\s+Adulto\s+(\d{7,})',
             r'pasajero\s+Documento\s+de\s+Identificaci[oó]n\s+[^\d]*(\d{7,})',
-            # NUEVOS PATRONES más flexibles:
-            r'Adulto\s+\d+\s+(\d{7,})',  # "Adulto 1 1022981317"
-            r'Tipo\s+de\s+pasajero.*?(\d{10})',  # Con salto de línea
-            r'USECHE.*?(\d{10})',  # Después del apellido
-            r'(\d{10})',  # Último recurso: cualquier número de 10 dígitos
+            r'Adulto\s+\d+\s+(\d{7,})',
+            r'Tipo\s+de\s+pasajero.*?(\d{10})',
+            r'USECHE.*?(\d{10})',
+            r'(\d{10})',
         ]
         extracted_data['nit_cliente'] = self._search_patterns(nit_cliente_patterns)
 
@@ -112,10 +109,8 @@ class FacturaExtractorLatam(TextExtractor):
         if not self.extract_text():
             return False, []
         
-        # DEBUG: Mostrar dónde aparece el documento
         print(f"\n=== DEBUG: Búsqueda de documento ===")
         
-        # Buscar "1022981317" y mostrar contexto
         doc_number = "1022981317"
         if doc_number in self.text:
             idx = self.text.index(doc_number)
@@ -128,7 +123,7 @@ class FacturaExtractorLatam(TextExtractor):
         adulto_matches = [m.start() for m in re.finditer(r'Adulto', self.text, re.IGNORECASE)]
         if adulto_matches:
             print(f"\nEncontradas {len(adulto_matches)} ocurrencias de 'Adulto':")
-            for i, idx in enumerate(adulto_matches[:3], 1):  # Solo primeras 3
+            for i, idx in enumerate(adulto_matches[:3], 1):  
                 start = max(0, idx - 50)
                 end = min(len(self.text), idx + 100)
                 print(f"{i}. '{self.text[start:end]}'")

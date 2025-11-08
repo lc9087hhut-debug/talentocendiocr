@@ -28,7 +28,7 @@ class FacturaProcessor:
         "yardins": FacturaExtractorYardins,
         "avianca": FacturaExtractorAvianca,
         "procafe": FacturaExtractorProcafe,
-        ##"d1": FacturaExtractorD1,
+        "d1": FacturaExtractorD1,
         "adidas": FacturaExtractoradidas,
     }
 

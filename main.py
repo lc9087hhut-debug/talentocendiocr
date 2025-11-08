@@ -35,7 +35,7 @@ def detect_factura_type(file_path):
             ("latam", FacturaExtractorLatam),
             ("avianca", FacturaExtractorAvianca),
             ("procafe", FacturaExtractorProcafe),
-            #("d1", FacturaExtractorD1),
+            ("d1", FacturaExtractorD1),
             ("adidas", FacturaExtractoradidas)
 
         ]
