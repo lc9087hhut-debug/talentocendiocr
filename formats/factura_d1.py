@@ -28,8 +28,9 @@ class FacturaExtractorD1(TextExtractor):
 
         # --- 3. Total ---
         valor_total_patterns = [
-            r'TOTAL:\s*([\d\.,]+)',
-            r'\[TOTALES\s+DE\s+FACTURA\].*?TOTAL:\s*([\d\.,]+)',
+            r'AJUSTE\s+A\s+VUELTAS[^\n]*\n[^\n]*TOTAL:\s*([\d\.,]+)',
+            r'(?<!SUB)TOTAL:\s*([\d\.,]+)',
+            r'IVA:\s*[\d\.,]+[^\n]*\n[^\n]*TOTAL:\s*([\d\.,]+)',  
         ]
         total_str = self._search_patterns(valor_total_patterns)
         extracted_data['valor_total'] = self._normalize_amount(total_str)
