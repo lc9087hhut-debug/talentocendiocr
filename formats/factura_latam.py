@@ -156,18 +156,25 @@ class FacturaExtractorLatam(TextExtractor):
         if not value:
             return "0,00"
         value = re.sub(r'\s+', '', value)
-        clean = re.sub(r"[^\d,\.]", "", value)
+        value = value.replace('$', '').replace('S', '')
         
-        if ',' in clean and '.' in clean:
-            clean = clean.replace('.', '').replace(',', '.')
-        elif ',' in clean:
-            clean = clean.replace(',', '.')
-        elif '.' in clean:
-            pass
+        clean = re.sub(r"[^\d\.]", "", value)
+        
+        if not clean:
+            return "0,00"
+        
+        if '.' in clean:
+            clean = clean.replace('.', '')
+        
         try:
-            num = float(clean)
-            return f"{num:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
-        except:
+            num = int(clean)
+            formatted = f"{num:,}" 
+            
+            formatted = formatted.replace(",", ".")
+            
+            return formatted + ",00"
+            
+        except (ValueError, OverflowError):
             return "0,00"
 
     @staticmethod
